@@ -10,6 +10,12 @@ public class Order {
 
     private Money totalAmounts;
 
+    public Order(ShippingInfo shippingInfo, List<OrderLine> orderLines) {
+        setShippingInfo(shippingInfo);
+        setOrderLines(orderLines);
+    }
+
+
     public void changeShippingInfo(ShippingInfo newShippingInfo){
         if(!isShippingChangeable()){
             throw new IllegalArgumentException("can't change shipping in" + state);
@@ -18,15 +24,37 @@ public class Order {
         this.shippingInfo = newShippingInfo;
     }
 
+    /**
+     * 취소는 출고 전에만 가능
+     */
+    public void cancle(){
+        verifyNotYetShipped();
+        this.state = OrderState.CANCELED;
+    }
+
+    /**
+     * 상품 출고 전 인지
+     */
+    private void verifyNotYetShipped() {
+
+        if (state != OrderState.PAYMENT_WAITING && state != OrderState.PREPARING) {
+            throw new IllegalArgumentException("aleady shipped");
+        }
+
+    }
+
+    /**
+     * 배송 취소 가능한 상태인지
+     * @return
+     */
     private boolean isShippingChangeable(){
         return state == OrderState.PAYMENT_WAITING || state == OrderState.PREPARING;
     }
 
-    public void setOrderLines(List<OrderLine> orderLines) {
-        verifyAtLeastOneOrMoreOrderLines(orderLines);
-        this.orderLines = orderLines;
-    }
-
+    /**
+     * 최소 한 종류 이상의 상품을 주문을 했는지
+     * @param orderLines
+     */
     private void verifyAtLeastOneOrMoreOrderLines(List<OrderLine> orderLines) {
         Optional.ofNullable(orderLines)
                 .filter(list -> !list.isEmpty())
@@ -34,6 +62,21 @@ public class Order {
     }
 
     private void calculateTotalAmounts(){
-        this.totalAmounts = new Money(orderLines.stream().mapToInt(x -> x.getAmounts()).sum());
+        int sum = orderLines.stream().mapToInt(x -> x.getAmounts().value).sum();
+        this.totalAmounts = new Money(sum);
+    }
+
+    /**
+     * 배송지 정보
+     * @param shippingInfo
+     */
+    private void setShippingInfo(ShippingInfo shippingInfo) {
+        Optional.ofNullable(shippingInfo).orElseThrow(() -> new IllegalArgumentException("No Shipping Info"));
+        this.shippingInfo = shippingInfo;
+    }
+
+    public void setOrderLines(List<OrderLine> orderLines) {
+        verifyAtLeastOneOrMoreOrderLines(orderLines);
+        this.orderLines = orderLines;
     }
 }
