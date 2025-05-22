@@ -15,3 +15,22 @@
 ### 🔥 도메인 계층은 도메인의 핵심 규칙을 구현한다.
 OrderState -> isShippingChangeable() : PAYMENT_WARING,PREPARING = true  
 - OrderState는 '주문 대기 중이거나 상품 준비 중에는 배송지를 변경할 수 있다' 도메인 규칙 구현함
+
+### 🔥 벨류 타입은 불변으로 구현한다.
+- Money가 불변 객체가 아니라면, price 파라미터가 변경될 때 발생하는 문제를 방지하기 위해 데이터를 복사한 새로운 객체를 생성해야 한다.
+- Money가 불변 객체이면 Money의 데이터를 바꿀 수가 없기 때문에 파라미터로 전달 받은 price를 안전하게 사용할 수 있다.
+
+### 🔥 set 메서드로 데이터를 전달하도록 구현하면 온전하지 않은 상태가 될 수 있다.
+##### set 메서드로 필요한 모든 값을 전달해야 함
+- order.setOrderLine(lines);
+- order.setShippingInfo(shippingInfo);
+
+##### orderer를 설정하지 않은 상태에서 주문 완료 처리
+- order.setState(OrderState.PREPARING);
+
+##### 도메인 객체를 불완전한 상태로 사용되는 것을 막으려면 생성 시점에 필요한 것을 전달해 주어야 한다. 즉 생성자를 통해 필요한 데이터를 모두 받아야 함
+
+- Order order = new Order(orderer, lines, shippingInfo, OrderState.PREPARING);
+
+### 🔥 최대한 도메인 용어를 사용해서 도메인 규칙을 코드로 작성
+- 의미를 변환하는 과정에서 발생하는 버그도 줄고, 의미를 다시 해석하는 과정도 생략 됨
