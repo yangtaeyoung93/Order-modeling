@@ -1,8 +1,12 @@
 package com.example.ddd.entity;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
 import java.util.List;
 import java.util.Optional;
-
+@EqualsAndHashCode
+@Getter
 public class Order {
     private OrderState state;
     private ShippingInfo shippingInfo;
